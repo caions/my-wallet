@@ -1,19 +1,18 @@
 import { createTheme } from '@mui/material/styles';
 
 export const theme = createTheme({
-  customColor:{
-    danger: '#FF0000'
-  },
   palette: {
     primary: {
-      main: '#5C5CFF',
-      light: '#A4A4FF',
+      main: '#719A4E',
     },
     secondary: {
-      main: '#9FA6AD',
+      main: '#BBDB90',
     },
     success: {
-      main: '#00C851',
+      main: '#00C8',
+    },
+    warning:{
+      main: '#FF0'
     },
     error: {
       main: '#FF4444',
@@ -21,5 +20,12 @@ export const theme = createTheme({
   },
   typography: {
     fontFamily: "'Inter', sans-serif",
+
+    allVariants:{
+      color: '#161B21'
+    }
+  },
+  customColor:{
+    danger: '#FF0000'
   },
 });
