@@ -79,15 +79,14 @@ const Expenses: React.FC = () => {
     descricao?: string;
     quantidade?: string;
     preco?: string;
-    data?: string;
-    acao?: number;
+    date?: string | Date;
+    acao?: string;
   }
 
   const [descricao, setDescricao] = useState("");
   const [preco, setPreco] = useState("0");
   const [quantidade, setQuantidade] = useState("0");
-  const [data, setData] = useState<Date | null>(new Date());
-  const [newDate, setNewDate] = useState<string>("");
+  const [date, setDate] = useState<Date | null>(new Date());
   const [rows, setRows] = useState<IRows[]>([]);
   const navigate = useNavigate();
 
@@ -97,8 +96,8 @@ const Expenses: React.FC = () => {
         descricao,
         preco,
         quantidade,
-        data: newDate || format(new Date(data ?? ""), "dd/MM/yyyy"),
-        acao: 1,
+        date: format(new Date(date ?? ""), "dd/MM/yyyy"),
+        acao: "Editar Excluir",
       },
       ...rows,
     ]);
@@ -150,13 +149,10 @@ const Expenses: React.FC = () => {
                   <Typography variant='h6'>Data</Typography>
                   <DesktopDatePicker
                     inputFormat='dd/MM/yyyy'
-                    value={data}
+                    value={date}
                     minDate={new Date("2017-01-01")}
-                    onChange={newValue => {
-                      setData(newValue);
-                      setNewDate(
-                        format(new Date(newValue ?? ""), "dd/MM/yyyy")
-                      );
+                    onChange={selectedDate => {
+                      setDate(selectedDate);
                     }}
                     renderInput={params => <TextField {...params} />}
                   />
@@ -171,7 +167,7 @@ const Expenses: React.FC = () => {
                   marginTop: "30px",
                 }}
               >
-                Adicionar
+                Adicionar item
               </Button>
             </Box>
           </form>
@@ -196,7 +192,7 @@ const Expenses: React.FC = () => {
                       {row.descricao}
                     </TableCell>
                     <TableCell align='center'>{row.quantidade}</TableCell>
-                    <TableCell align='center'>{row.data}</TableCell>
+                    <TableCell align='center'>{row.date}</TableCell>
                     <TableCell align='center'>{row.preco}</TableCell>
                     <TableCell align='center'>{row.acao}</TableCell>
                   </TableRow>
