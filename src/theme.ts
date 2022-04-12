@@ -2,6 +2,10 @@ import { createTheme } from '@mui/material/styles';
 
 export const theme = createTheme({
   palette: {
+    common:{
+      black: '#161B21',
+      white: '#DAE7F7'
+    },
     primary: {
       main: '#719A4E',
     },
@@ -9,13 +13,13 @@ export const theme = createTheme({
       main: '#BBDB90',
     },
     success: {
-      main: '#00C8',
+      main: '#0033CC',
     },
     warning:{
-      main: '#FF0'
+      main: '#FFCC00'
     },
     error: {
-      main: '#FF4444',
+      main: '#CC3300',
     },
   },
   typography: {
