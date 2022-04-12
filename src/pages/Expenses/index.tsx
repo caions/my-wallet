@@ -10,7 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import Button from "../../components/Button";
 import { InputText } from "../../components/InputText";
@@ -18,6 +18,7 @@ import Title from "../../components/Title";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns/esm";
 
 const Expenses: React.FC = () => {
   const container = {
@@ -74,26 +75,34 @@ const Expenses: React.FC = () => {
     },
   };
 
-  const [value, setValue] = React.useState<Date | null>(new Date());
-  const navigate = useNavigate();
-
-  function createData(
-    descricao: string,
-    quantidade: number,
-    data: number,
-    preco: number,
-    acao: number
-  ) {
-    return { descricao, quantidade, data, preco, acao };
+  interface IRows {
+    descricao?: string;
+    quantidade?: string;
+    preco?: string;
+    data?: string;
+    acao?: number;
   }
 
-  const rows = [
-    createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-    createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-    createData("Eclair", 262, 16.0, 24, 6.0),
-    createData("Cupcake", 305, 3.7, 67, 4.3),
-    createData("Gingerbread", 356, 16.0, 49, 3.9),
-  ];
+  const [descricao, setDescricao] = useState("");
+  const [preco, setPreco] = useState("0");
+  const [quantidade, setQuantidade] = useState("0");
+  const [data, setData] = useState<Date | null>(new Date());
+  const [newDate, setNewDate] = useState<string>("");
+  const [rows, setRows] = useState<IRows[]>([]);
+  const navigate = useNavigate();
+
+  const handleSubmit = () => {
+    setRows([
+      {
+        descricao,
+        preco,
+        quantidade,
+        data: newDate || format(new Date(data ?? ""), "dd/MM/yyyy"),
+        acao: 1,
+      },
+      ...rows,
+    ]);
+  };
 
   return (
     <>
@@ -106,47 +115,66 @@ const Expenses: React.FC = () => {
             </Button>
             <InputText innerStartAdornment='R$' disabled />
           </Box>
-          <InputText topLabel='Descrição do item' fullWidth />
-          <Box sx={sectionInputsRow}>
+          <form method='post' onSubmit={e => e.preventDefault()}>
             <InputText
-              inputWidth='200px'
-              topLabel='Preço'
-              innerStartAdornment='R$'
-              type={"number"}
+              topLabel='Descrição do item'
+              fullWidth
+              name='descricao'
+              value={descricao}
+              onChange={e => setDescricao(e.target.value)}
             />
-            <InputText
-              topLabel='Quantidade'
-              type={"number"}
-              inputWidth='200px'
-            />
-            <Box
-              sx={{
-                width: "200px",
-              }}
-            >
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <Typography variant='h6'>Data</Typography>
-                <DesktopDatePicker
-                  inputFormat='dd/MM/yyyy'
-                  value={value}
-                  minDate={new Date("2017-01-01")}
-                  onChange={(newValue: any) => {
-                    setValue(newValue);
-                  }}
-                  renderInput={(params: any) => <TextField {...params} />}
-                />
-              </LocalizationProvider>
+            <Box sx={sectionInputsRow}>
+              <InputText
+                inputWidth='200px'
+                topLabel='Preço'
+                innerStartAdornment='R$'
+                type={"number"}
+                name='preco'
+                value={preco}
+                onChange={e => setPreco(e.target.value)}
+              />
+              <InputText
+                topLabel='Quantidade'
+                type={"number"}
+                inputWidth='200px'
+                name='quantidade'
+                value={quantidade}
+                onChange={e => setQuantidade(e.target.value)}
+              />
+              <Box
+                sx={{
+                  width: "200px",
+                }}
+              >
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <Typography variant='h6'>Data</Typography>
+                  <DesktopDatePicker
+                    inputFormat='dd/MM/yyyy'
+                    value={data}
+                    minDate={new Date("2017-01-01")}
+                    onChange={newValue => {
+                      setData(newValue);
+                      setNewDate(
+                        format(new Date(newValue ?? ""), "dd/MM/yyyy")
+                      );
+                    }}
+                    renderInput={params => <TextField {...params} />}
+                  />
+                </LocalizationProvider>
+              </Box>
+              <Button
+                type='submit'
+                onClick={handleSubmit}
+                sx={{
+                  width: "190px",
+                  height: "50px",
+                  marginTop: "30px",
+                }}
+              >
+                Adicionar
+              </Button>
             </Box>
-            <Button
-              sx={{
-                width: "190px",
-                height: "50px",
-                marginTop: "30px",
-              }}
-            >
-              Adicionar
-            </Button>
-          </Box>
+          </form>
           <TableContainer component={Paper} sx={{ boxShadow: "none" }}>
             <Table sx={tableStyle} size='small' aria-label='a dense table'>
               <TableHead>
@@ -159,9 +187,9 @@ const Expenses: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map(row => (
+                {rows.map((row, key) => (
                   <TableRow
-                    key={row.descricao}
+                    key={key}
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   >
                     <TableCell component='th' scope='row'>
