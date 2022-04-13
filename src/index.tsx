@@ -1,21 +1,14 @@
-import ReactDOM from "react-dom";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { theme } from "./theme";
-import { ThemeProvider } from "@mui/material/styles";
-import { Home } from "./pages/Home";
-import Expenses from "./pages/Expenses";
+import React from "react";
+import { render } from "react-dom";
+import App from "./App";
+
+const container = document.getElementById("root");
 
 import "./index.css";
 
-ReactDOM.render(
-  <ThemeProvider theme={theme}>
-    <BrowserRouter>
-      <Routes>
-        <Route path='*' element={<Home />} />
-        <Route path='/home' element={<Home />} />
-        <Route path='/expenses' element={<Expenses />} />
-      </Routes>
-    </BrowserRouter>
-  </ThemeProvider>,
-  document.getElementById("root")
+render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  container
 );
