@@ -23,7 +23,8 @@
     ],
     "ignorePatterns": ["src/theme/types","commitlint.config.js"],
     "rules": {
-        "@typescript-eslint/no-unused-vars": "error",
+        "prefer-const": "warn",
+        "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/no-explicit-any": "error",
         "no-unused-expressions": ["error", { "enforceForJSX": true }],
         "react/jsx-uses-react": "error",

@@ -19,6 +19,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns/esm";
+import * as yup from "yup";
 
 const Expenses: React.FC = () => {
   const container = {
@@ -77,30 +78,54 @@ const Expenses: React.FC = () => {
 
   interface IRows {
     descricao?: string;
-    quantidade?: string;
-    preco?: string;
+    quantidade?: number;
+    preco?: number;
     date?: string | Date;
     acao?: string;
   }
 
   const [descricao, setDescricao] = useState("");
-  const [preco, setPreco] = useState("0");
-  const [quantidade, setQuantidade] = useState("0");
+  const [preco, setPreco] = useState(0);
+  const [quantidade, setQuantidade] = useState(0);
   const [date, setDate] = useState<Date | null>(new Date());
   const [rows, setRows] = useState<IRows[]>([]);
+  const [validate, setValidate] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  let schema = yup.object().shape({
+    descricao: yup.string().required(),
+    quantidade: yup.number().min(1).required(),
+    preco: yup.number().min(1).required(),
+  });
+
+  schema
+    .isValid({
+      descricao,
+      quantidade,
+      preco,
+    })
+    .then(function (valid) {
+      setValidate(valid);
+    });
+
   const handleSubmit = () => {
+    if (!validate) {
+      return;
+    }
+
     setRows([
       {
         descricao,
-        preco: "R$ " + preco,
+        preco: preco,
         quantidade,
         date: format(new Date(date ?? ""), "dd/MM/yyyy"),
         acao: "Editar Excluir",
       },
       ...rows,
     ]);
+    setDescricao("");
+    setPreco(0);
+    setQuantidade(0);
   };
 
   return (
@@ -130,7 +155,7 @@ const Expenses: React.FC = () => {
                 type={"number"}
                 name='preco'
                 value={preco}
-                onChange={e => setPreco(e.target.value)}
+                onChange={e => setPreco(Number(e.target.value))}
               />
               <InputText
                 topLabel='Quantidade'
@@ -138,7 +163,7 @@ const Expenses: React.FC = () => {
                 inputWidth='200px'
                 name='quantidade'
                 value={quantidade}
-                onChange={e => setQuantidade(e.target.value)}
+                onChange={e => setQuantidade(Number(e.target.value))}
               />
               <Box
                 sx={{
