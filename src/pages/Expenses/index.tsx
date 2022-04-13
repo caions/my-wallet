@@ -94,7 +94,7 @@ const Expenses: React.FC = () => {
     setRows([
       {
         descricao,
-        preco,
+        preco: "R$ " + preco,
         quantidade,
         date: format(new Date(date ?? ""), "dd/MM/yyyy"),
         acao: "Editar Excluir",
