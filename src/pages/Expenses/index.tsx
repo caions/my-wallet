@@ -78,24 +78,25 @@ const Expenses: React.FC = () => {
 
   interface IRows {
     descricao?: string;
-    quantidade?: number;
-    preco?: number;
+    quantidade?: string;
+    preco?: string;
     date?: string | Date;
     acao?: string;
   }
 
   const [descricao, setDescricao] = useState("");
-  const [preco, setPreco] = useState(0);
-  const [quantidade, setQuantidade] = useState(0);
+  const [preco, setPreco] = useState("");
+  const [quantidade, setQuantidade] = useState("");
   const [date, setDate] = useState<Date | null>(new Date());
   const [rows, setRows] = useState<IRows[]>([]);
+  const [errors, setErrors] = useState([]);
   const [validate, setValidate] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  let schema = yup.object().shape({
-    descricao: yup.string().required(),
-    quantidade: yup.number().min(1).required(),
-    preco: yup.number().min(1).required(),
+  let schema = yup.object({
+    descricao: yup.string().required("Descrição é um campo obrigatório"),
+    quantidade: yup.string().min(1).required(""),
+    preco: yup.string().required(),
   });
 
   schema
@@ -104,28 +105,34 @@ const Expenses: React.FC = () => {
       quantidade,
       preco,
     })
-    .then(function (valid) {
+    .then(valid => {
       setValidate(valid);
     });
-
+  console.log(errors);
   const handleSubmit = () => {
+    schema
+      .validate({ descricao, preco, quantidade }, { abortEarly: false })
+      .catch(err => {
+        setErrors(err.errors);
+      });
+
     if (!validate) {
       return;
     }
 
     setRows([
+      ...rows,
       {
         descricao,
-        preco: preco,
+        preco: "R$ " + preco,
         quantidade,
         date: format(new Date(date ?? ""), "dd/MM/yyyy"),
         acao: "Editar Excluir",
       },
-      ...rows,
     ]);
     setDescricao("");
-    setPreco(0);
-    setQuantidade(0);
+    setPreco("");
+    setQuantidade("");
   };
 
   return (
@@ -147,24 +154,29 @@ const Expenses: React.FC = () => {
               value={descricao}
               onChange={e => setDescricao(e.target.value)}
             />
+            <span>{errors[0]}</span>
             <Box sx={sectionInputsRow}>
               <InputText
+                placeholder='0'
                 inputWidth='200px'
                 topLabel='Preço'
                 innerStartAdornment='R$'
                 type={"number"}
                 name='preco'
                 value={preco}
-                onChange={e => setPreco(Number(e.target.value))}
+                onChange={e => setPreco(e.target.value)}
               />
+              <span>{errors[1]}</span>
               <InputText
+                placeholder='0'
                 topLabel='Quantidade'
                 type={"number"}
                 inputWidth='200px'
                 name='quantidade'
                 value={quantidade}
-                onChange={e => setQuantidade(Number(e.target.value))}
+                onChange={e => setQuantidade(e.target.value)}
               />
+              <span>{errors[2]}</span>
               <Box
                 sx={{
                   width: "200px",
@@ -175,7 +187,7 @@ const Expenses: React.FC = () => {
                   <DesktopDatePicker
                     inputFormat='dd/MM/yyyy'
                     value={date}
-                    minDate={new Date("2017-01-01")}
+                    minDate={new Date("2021-01-01")}
                     onChange={selectedDate => {
                       setDate(selectedDate);
                     }}
@@ -201,9 +213,9 @@ const Expenses: React.FC = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>DESCRIÇÃO</TableCell>
+                  <TableCell align='center'>PREÇO</TableCell>
                   <TableCell align='center'>QUANTIDADE</TableCell>
                   <TableCell align='center'>DATA</TableCell>
-                  <TableCell align='center'>PREÇO</TableCell>
                   <TableCell align='center'>AÇÃO</TableCell>
                 </TableRow>
               </TableHead>
@@ -216,9 +228,9 @@ const Expenses: React.FC = () => {
                     <TableCell component='th' scope='row'>
                       {row.descricao}
                     </TableCell>
+                    <TableCell align='center'>{row.preco}</TableCell>
                     <TableCell align='center'>{row.quantidade}</TableCell>
                     <TableCell align='center'>{row.date}</TableCell>
-                    <TableCell align='center'>{row.preco}</TableCell>
                     <TableCell align='center'>{row.acao}</TableCell>
                   </TableRow>
                 ))}
