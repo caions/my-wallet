@@ -46,7 +46,6 @@ const Expenses: React.FC = () => {
 
   const sectionInputsRow = {
     display: "flex",
-    alignItems: "center",
     justifyContent: "space-between",
     margin: "20px 0",
   };
@@ -84,22 +83,28 @@ const Expenses: React.FC = () => {
     acao?: string;
   }
 
+  interface IErrors{
+    descricao?: string;
+    preco?: string;
+    quantidade?: string;
+  }
+
   const [descricao, setDescricao] = useState("");
   const [preco, setPreco] = useState("");
   const [quantidade, setQuantidade] = useState("");
   const [date, setDate] = useState<Date | null>(new Date());
   const [rows, setRows] = useState<IRows[]>([]);
-  const [errors, setErrors] = useState([]);
+  const [errors, setErrors] = useState<IErrors>({});
   const [validate, setValidate] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  let schema = yup.object({
-    descricao: yup.string().required("Descrição é um campo obrigatório"),
-    quantidade: yup.string().min(1).required(""),
+  let validationSchema = yup.object({
+    descricao: yup.string().required(),
+    quantidade: yup.string().min(1).required(),
     preco: yup.string().required(),
   });
 
-  schema
+  validationSchema
     .isValid({
       descricao,
       quantidade,
@@ -108,12 +113,20 @@ const Expenses: React.FC = () => {
     .then(valid => {
       setValidate(valid);
     });
-  console.log(errors);
+
   const handleSubmit = () => {
-    schema
+    validationSchema
       .validate({ descricao, preco, quantidade }, { abortEarly: false })
-      .catch(err => {
-        setErrors(err.errors);
+      .catch((err) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const erros:any = {}
+        for (let prop in err.inner) {
+
+          let key = err.inner[prop].path          
+          erros[key as keyof string] = err.inner[prop].message
+
+        }   
+        setErrors(erros);
       });
 
     if (!validate) {
@@ -148,15 +161,18 @@ const Expenses: React.FC = () => {
           </Box>
           <form method='post' onSubmit={e => e.preventDefault()}>
             <InputText
+              error
               topLabel='Descrição do item'
               fullWidth
               name='descricao'
               value={descricao}
               onChange={e => setDescricao(e.target.value)}
+              helperText={errors.descricao}
             />
-            <span>{errors[0]}</span>
+           {/*  <span>{errors[0]}</span> */}
             <Box sx={sectionInputsRow}>
               <InputText
+                error
                 placeholder='0'
                 inputWidth='200px'
                 topLabel='Preço'
@@ -165,9 +181,10 @@ const Expenses: React.FC = () => {
                 name='preco'
                 value={preco}
                 onChange={e => setPreco(e.target.value)}
+                helperText={errors.preco}
               />
-              <span>{errors[1]}</span>
               <InputText
+                error
                 placeholder='0'
                 topLabel='Quantidade'
                 type={"number"}
@@ -175,8 +192,8 @@ const Expenses: React.FC = () => {
                 name='quantidade'
                 value={quantidade}
                 onChange={e => setQuantidade(e.target.value)}
+                helperText={errors.quantidade}
               />
-              <span>{errors[2]}</span>
               <Box
                 sx={{
                   width: "200px",
