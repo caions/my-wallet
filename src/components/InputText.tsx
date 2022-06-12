@@ -13,7 +13,7 @@ type InputTextProps = {
   topLabel?: ReactNode;
   innerStartAdornment?: ReactNode;
   inputWidth?: string;
-  sx?: SxProps<Theme>;
+  sx?: SxProps<Theme>;  
 } & TextFieldProps;
 
 export const InputText: React.FC<InputTextProps> = ({
@@ -30,22 +30,32 @@ export const InputText: React.FC<InputTextProps> = ({
   };
 
   const inputTextStyle = {
-    ".MuiInputBase-formControl": {
-      color: "primary.main",
-      ".MuiOutlinedInput-notchedOutline": {
-        borderColor: "primary.main",
-      },
+    ".MuiOutlinedInput-notchedOutline":{
+      borderColor: 'primary.main',
+      borderWidth: 2,
+    },
+    ':hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'primary.main',
+    },
+    '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderWidth: 3,
+    },
+    '.Mui-error .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#CC3300',
+    },
+    ':hover .Mui-error .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#CC3300',
     },
     ".MuiInputBase-adornedStart": {
       ".MuiTypography-root": {
         color: "primary.main",
       },
     },
-    ".MuiFormHelperText-contained":{
+    ".MuiFormHelperText-root":{
       fontSize: '14px',
       position: 'absolute',
       top: '55px'
-    }
+    },
   };
 
   return (
