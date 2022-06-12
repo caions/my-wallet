@@ -10,7 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import Button from "../../components/Button";
 import { InputText } from "../../components/InputText";
@@ -20,6 +20,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns/esm";
 import * as yup from "yup";
+import { ValidateOptions } from "yup/lib/types";
 
 const Expenses: React.FC = () => {
   const container = {
@@ -98,10 +99,20 @@ const Expenses: React.FC = () => {
   const [validate, setValidate] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  let validationSchema = yup.object({
-    descricao: yup.string().required("Campo obrigatório"),
-    quantidade: yup.string().min(1).required("Campo obrigatório"),
-    preco: yup.string().required("Campo obrigatório"),
+  yup.setLocale({
+    mixed: {
+      required: "Campo obrigatório"
+    },
+    number: {
+      min: 'Deve ser maior ou igual a ${min}',
+    },
+  });
+
+
+  const validationSchema = yup.object({
+    descricao: yup.string().required(),
+    quantidade: yup.number().required().min(1).integer(),
+    preco: yup.string().required(),
   });
 
   validationSchema
@@ -110,23 +121,29 @@ const Expenses: React.FC = () => {
     quantidade,
     preco,
   })
-  .then(valid => {
-    setValidate(valid);
+  .then((valid) => {
+    setValidate(valid)
   });
 
- 
-  const handleSubmit = () => {
+  const validateFields = () => {
+    const options:ValidateOptions = { abortEarly: false, strict: true }
+
     validationSchema
-      .validate({ descricao, preco, quantidade }, { abortEarly: false })
+      .validate({ descricao, preco, quantidade: Number(quantidade) }, options )
       .catch((err) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const erros:any = {}
-        for (let prop in err.inner) {
-          let key = err.inner[prop].path          
+        for (const prop in err.inner) {
+          const key = err.inner[prop].path          
           erros[key as keyof string] = err.inner[prop].message
         }   
         setErrors(erros);
       });
+  }
+ 
+  const handleSubmit = () => {
+  
+    validateFields()
  
     if (validate) {
       setErrors({});
@@ -197,7 +214,10 @@ const Expenses: React.FC = () => {
                   width: "200px",
                 }}
               >
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
+
+                <LocalizationProvider  
+                 dateAdapter={AdapterDateFns}>
+                 
                   <Typography variant='h6'>Data</Typography>
                   <DesktopDatePicker
                     inputFormat='dd/MM/yyyy'
@@ -206,7 +226,19 @@ const Expenses: React.FC = () => {
                     onChange={selectedDate => {
                       setDate(selectedDate);
                     }}
-                    renderInput={params => <TextField {...params} />}
+                    renderInput={params => <TextField 
+                      sx={{
+                        '.MuiOutlinedInput-notchedOutline':{
+                          borderColor: 'primary.main'
+                        },
+                        ':hover .MuiOutlinedInput-notchedOutline':{
+                          borderColor: 'primary.main'
+                        },
+                        '.Mui-focused .MuiOutlinedInput-notchedOutline':{
+                          borderWidth: 3,
+                        }
+                      }}
+                      {...params} />}
                   />
                 </LocalizationProvider>
               </Box>

@@ -41,10 +41,10 @@ export const InputText: React.FC<InputTextProps> = ({
       borderWidth: 3,
     },
     '.Mui-error .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#CC3300',
+      borderColor: 'error.main',
     },
     ':hover .Mui-error .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#CC3300',
+      borderColor: 'error.main',
     },
     ".MuiInputBase-adornedStart": {
       ".MuiTypography-root": {
