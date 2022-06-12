@@ -99,21 +99,22 @@ const Expenses: React.FC = () => {
   const navigate = useNavigate();
 
   let validationSchema = yup.object({
-    descricao: yup.string().required(),
-    quantidade: yup.string().min(1).required(),
-    preco: yup.string().required(),
+    descricao: yup.string().required("Campo obrigatório"),
+    quantidade: yup.string().min(1).required("Campo obrigatório"),
+    preco: yup.string().required("Campo obrigatório"),
   });
 
   validationSchema
-    .isValid({
-      descricao,
-      quantidade,
-      preco,
-    })
-    .then(valid => {
-      setValidate(valid);
-    });
+  .isValid({
+    descricao,
+    quantidade,
+    preco,
+  })
+  .then(valid => {
+    setValidate(valid);
+  });
 
+ 
   const handleSubmit = () => {
     validationSchema
       .validate({ descricao, preco, quantidade }, { abortEarly: false })
@@ -121,31 +122,28 @@ const Expenses: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const erros:any = {}
         for (let prop in err.inner) {
-
           let key = err.inner[prop].path          
           erros[key as keyof string] = err.inner[prop].message
-
         }   
         setErrors(erros);
       });
-
-    if (!validate) {
-      return;
+ 
+    if (validate) {
+      setErrors({});
+      setRows([
+        ...rows,
+        {
+          descricao,
+          preco: "R$ " + preco,
+          quantidade,
+          date: format(new Date(date ?? ""), "dd/MM/yyyy"),
+          acao: "Editar Excluir",
+        },
+      ]);
+      setDescricao("");
+      setPreco("");
+      setQuantidade("");
     }
-
-    setRows([
-      ...rows,
-      {
-        descricao,
-        preco: "R$ " + preco,
-        quantidade,
-        date: format(new Date(date ?? ""), "dd/MM/yyyy"),
-        acao: "Editar Excluir",
-      },
-    ]);
-    setDescricao("");
-    setPreco("");
-    setQuantidade("");
   };
 
   return (
@@ -161,7 +159,7 @@ const Expenses: React.FC = () => {
           </Box>
           <form method='post' onSubmit={e => e.preventDefault()}>
             <InputText
-              error
+              error={!!errors.descricao}
               topLabel='Descrição do item'
               fullWidth
               name='descricao'
@@ -172,7 +170,7 @@ const Expenses: React.FC = () => {
            {/*  <span>{errors[0]}</span> */}
             <Box sx={sectionInputsRow}>
               <InputText
-                error
+                error={!!errors.preco}
                 placeholder='0'
                 inputWidth='200px'
                 topLabel='Preço'
@@ -184,7 +182,7 @@ const Expenses: React.FC = () => {
                 helperText={errors.preco}
               />
               <InputText
-                error
+                error={!!errors.quantidade}
                 placeholder='0'
                 topLabel='Quantidade'
                 type={"number"}
@@ -225,7 +223,7 @@ const Expenses: React.FC = () => {
               </Button>
             </Box>
           </form>
-          <TableContainer component={Paper} sx={{ boxShadow: "none" }}>
+          <TableContainer component={Paper} sx={{ boxShadow: "none", marginTop: '10px' }}>
             <Table sx={tableStyle} size='small' aria-label='a dense table'>
               <TableHead>
                 <TableRow>

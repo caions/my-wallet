@@ -41,6 +41,11 @@ export const InputText: React.FC<InputTextProps> = ({
         color: "primary.main",
       },
     },
+    ".MuiFormHelperText-contained":{
+      fontSize: '14px',
+      position: 'absolute',
+      top: '55px'
+    }
   };
 
   return (
