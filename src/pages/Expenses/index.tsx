@@ -10,7 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import Button from "../../components/Button";
 import { InputText } from "../../components/InputText";
@@ -77,6 +77,7 @@ const Expenses: React.FC = () => {
   };
 
   interface IRows {
+    id: number;
     descricao?: string;
     quantidade?: string;
     preco?: string;
@@ -140,16 +141,20 @@ const Expenses: React.FC = () => {
         setErrors(erros);
       });
   }
+
  
   const handleSubmit = () => {
   
+
     validateFields()
- 
+
     if (validate) {
+
       setErrors({});
       setRows([
         ...rows,
         {
+          id: rows.length +1,
           descricao,
           preco: "R$ " + preco,
           quantidade,
@@ -162,6 +167,12 @@ const Expenses: React.FC = () => {
       setQuantidade("");
     }
   };
+
+  const deleteRow = (key:number) =>{
+    if(confirm('Deseja realmente excluir esse item?')){
+      setRows(rows.filter((r)=>r.id !== key))
+    }
+  }
 
   return (
     <>
@@ -278,7 +289,13 @@ const Expenses: React.FC = () => {
                     <TableCell align='center'>{row.preco}</TableCell>
                     <TableCell align='center'>{row.quantidade}</TableCell>
                     <TableCell align='center'>{row.date}</TableCell>
-                    <TableCell align='center'>{row.acao}</TableCell>
+                    <TableCell align='center'>
+                      <span style={{marginRight: '7px'}}>Editar</span>
+                      <span 
+                      style={{marginRight: '7px',cursor: 'pointer'}} 
+                      onClick={()=>deleteRow(row.id)} >Deletar
+                      </span>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
