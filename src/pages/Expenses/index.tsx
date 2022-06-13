@@ -1,16 +1,11 @@
 import {
   Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  styled,
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import { DataGrid, gridClasses, GridColDef } from '@mui/x-data-grid';
+import React, { useEffect, useState } from "react";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import Button from "../../components/Button";
 import { InputText } from "../../components/InputText";
@@ -22,7 +17,95 @@ import { format } from "date-fns/esm";
 import * as yup from "yup";
 import { ValidateOptions } from "yup/lib/types";
 
+const columns: GridColDef[] = [
+  {
+    headerClassName: 'super-app-theme--header',
+    field: 'id',
+    headerName: 'ID',
+    width: 85,
+    headerAlign: 'center',
+    align: 'center',
+  },
+  {
+    headerClassName: 'super-app-theme--header',
+    field: 'descricao',
+    headerName: 'Descrição',
+    width: 253,
+    editable: true,
+    headerAlign: 'center',
+    align: 'center'
+  },
+  {
+    headerClassName: 'super-app-theme--header',
+    field: 'preco',
+    headerName: 'Preço',
+    width: 165,
+    editable: true,
+    headerAlign: 'center',
+    align: 'center'
+  },
+  {
+    headerClassName: 'super-app-theme--header',
+    field: 'quantidade',
+    headerName: 'quantidade',
+    type: 'number',
+    width: 200,
+    editable: true,
+    headerAlign: 'center',
+    align: 'center'
+  },
+  {
+    headerClassName: 'super-app-theme--header',
+    field: 'date',
+    headerName: 'Data',
+    type: 'date',
+    width: 221,
+    editable: true,
+    headerAlign: 'center',
+    align: 'center'
+  },
+  {
+    headerClassName: 'super-app-theme--header',
+    field: 'acao',
+    headerName: 'Ação',
+    type: 'string',
+    width: 275,
+    editable: false,
+    headerAlign: 'center',
+    align: 'center',
+    hideSortIcons: true,
+    disableColumnMenu: true
+  }
+];
+
+const rows2 = [
+  { id: 1, descricao: 'produto 1', preco: '22.50', quantidade: '35', date: new Date(), acao: "Editar Excluir" },
+  { id: 2, descricao: 'produto 2', preco: '22.50', quantidade: '42', date: new Date(), acao: "Editar Excluir" },
+  { id: 3, descricao: 'produto 3', preco: '22.50', quantidade: '45', date: new Date(), acao: "Editar Excluir" },
+  { id: 4, descricao: 'produto 4 ', preco: '22.50', quantidade: '16', date: new Date(), acao: "Editar Excluir" },
+  { id: 5, descricao: 'produto 5', preco: '22.50', quantidade: '15', date: new Date(), acao: "Editar Excluir" },
+  { id: 6, descricao: 'produto 6', preco: '50.50', quantidade: '150', date: new Date() },
+  { id: 7, descricao: 'produto 7', preco: '22.50', quantidade: '44', date: new Date(), acao: "Editar Excluir" },
+  { id: 8, descricao: 'produto 8', preco: '22.50', quantidade: '36', date: new Date(), acao: "Editar Excluir" },
+  { id: 9, descricao: 'produto 9', preco: '22.50', quantidade: '65', date: new Date(), acao: "Editar Excluir" },
+];
+
+const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+  [`& .${gridClasses.row}.even`]: {
+    backgroundColor: theme.palette.grey[200],
+    '&:hover, &.Mui-hovered': {
+      backgroundColor: theme.palette.common.white,
+    },
+  },
+  [`& .${gridClasses.row}.odd`]: {
+    '&:hover, &.Mui-hovered': {
+      backgroundColor: theme.palette.common.white,
+    },
+  },
+}));
+
 const Expenses: React.FC = () => {
+
   const container = {
     display: "flex",
     width: "100%",
@@ -32,18 +115,31 @@ const Expenses: React.FC = () => {
     marginBottom: "50px",
   };
 
-  const sectionContainer = {
-    display: "flex",
+  const formContainer = {
     width: "80%",
-    flexDirection: "column",
     marginTop: "50px",
   };
 
-  const sectionHeader = {
+  const headerContainer = {
     display: "flex",
     justifyContent: "space-between",
     marginBottom: "20px",
   };
+
+  const tableContainer = {
+    width: "80%",
+    fontSize: '17px',
+    '.MuiDataGrid-columnHeaderTitle': {
+      fontWeight: 700
+    },
+    '.super-app-theme--header': {
+      textTransform: 'uppercase',
+      backgroundColor: "primary.main",
+      fontSize: "17px",
+      color: "white",
+    },
+
+  }
 
   const sectionInputsRow = {
     display: "flex",
@@ -85,7 +181,7 @@ const Expenses: React.FC = () => {
     acao?: string;
   }
 
-  interface IErrors{
+  interface IErrors {
     descricao?: string;
     preco?: string;
     quantidade?: string;
@@ -117,34 +213,33 @@ const Expenses: React.FC = () => {
   });
 
   validationSchema
-  .isValid({
-    descricao,
-    quantidade,
-    preco,
-  })
-  .then((valid) => {
-    setValidate(valid)
-  });
+    .isValid({
+      descricao,
+      quantidade,
+      preco,
+    })
+    .then((valid) => {
+      setValidate(valid)
+    });
 
   const validateFields = () => {
-    const options:ValidateOptions = { abortEarly: false, strict: true }
+    const options: ValidateOptions = { abortEarly: false, strict: true }
 
     validationSchema
-      .validate({ descricao, preco, quantidade: Number(quantidade) }, options )
+      .validate({ descricao, preco, quantidade: Number(quantidade) }, options)
       .catch((err) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const erros:any = {}
+        const erros: any = {}
         for (const prop in err.inner) {
-          const key = err.inner[prop].path          
+          const key = err.inner[prop].path
           erros[key as keyof string] = err.inner[prop].message
-        }   
+        }
         setErrors(erros);
       });
   }
 
- 
+
   const handleSubmit = () => {
-  
 
     validateFields()
 
@@ -154,7 +249,7 @@ const Expenses: React.FC = () => {
       setRows([
         ...rows,
         {
-          id: rows.length +1,
+          id: rows.length + 1,
           descricao,
           preco: "R$ " + preco,
           quantidade,
@@ -168,18 +263,22 @@ const Expenses: React.FC = () => {
     }
   };
 
-  const deleteRow = (key:number) =>{
-    if(confirm('Deseja realmente excluir esse item?')){
-      setRows(rows.filter((r)=>r.id !== key))
+  const deleteRow = (key: number) => {
+    if (confirm('Deseja realmente excluir esse item?')) {
+      setRows(rows.filter((r) => r.id !== key))
     }
   }
+
+  useEffect(() => {
+    setRows(rows2)
+  }, [])
 
   return (
     <>
       <Box sx={container}>
         <Title />
-        <Box sx={sectionContainer}>
-          <Box sx={sectionHeader}>
+        <Box sx={formContainer}>
+          <Box sx={headerContainer}>
             <Button color='warning' onClick={() => navigate("/")}>
               Voltar
             </Button>
@@ -195,7 +294,7 @@ const Expenses: React.FC = () => {
               onChange={e => setDescricao(e.target.value)}
               helperText={errors.descricao}
             />
-           {/*  <span>{errors[0]}</span> */}
+            {/*  <span>{errors[0]}</span> */}
             <Box sx={sectionInputsRow}>
               <InputText
                 error={!!errors.preco}
@@ -226,9 +325,9 @@ const Expenses: React.FC = () => {
                 }}
               >
 
-                <LocalizationProvider  
-                 dateAdapter={AdapterDateFns}>
-                 
+                <LocalizationProvider
+                  dateAdapter={AdapterDateFns}>
+
                   <Typography variant='h6'>Data</Typography>
                   <DesktopDatePicker
                     inputFormat='dd/MM/yyyy'
@@ -237,15 +336,15 @@ const Expenses: React.FC = () => {
                     onChange={selectedDate => {
                       setDate(selectedDate);
                     }}
-                    renderInput={params => <TextField 
+                    renderInput={params => <TextField
                       sx={{
-                        '.MuiOutlinedInput-notchedOutline':{
+                        '.MuiOutlinedInput-notchedOutline': {
                           borderColor: 'primary.main'
                         },
-                        ':hover .MuiOutlinedInput-notchedOutline':{
+                        ':hover .MuiOutlinedInput-notchedOutline': {
                           borderColor: 'primary.main'
                         },
-                        '.Mui-focused .MuiOutlinedInput-notchedOutline':{
+                        '.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderWidth: 3,
                         }
                       }}
@@ -266,43 +365,25 @@ const Expenses: React.FC = () => {
               </Button>
             </Box>
           </form>
-          <TableContainer component={Paper} sx={{ boxShadow: "none", marginTop: '10px' }}>
-            <Table sx={tableStyle} size='small' aria-label='a dense table'>
-              <TableHead>
-                <TableRow>
-                  <TableCell>DESCRIÇÃO</TableCell>
-                  <TableCell align='center'>PREÇO</TableCell>
-                  <TableCell align='center'>QUANTIDADE</TableCell>
-                  <TableCell align='center'>DATA</TableCell>
-                  <TableCell align='center'>AÇÃO</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row, key) => (
-                  <TableRow
-                    key={key}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell component='th' scope='row'>
-                      {row.descricao}
-                    </TableCell>
-                    <TableCell align='center'>{row.preco}</TableCell>
-                    <TableCell align='center'>{row.quantidade}</TableCell>
-                    <TableCell align='center'>{row.date}</TableCell>
-                    <TableCell align='center'>
-                      <span style={{marginRight: '7px'}}>Editar</span>
-                      <span 
-                      style={{marginRight: '7px',cursor: 'pointer'}} 
-                      onClick={()=>deleteRow(row.id)} >Deletar
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        </Box>
+        <Box sx={tableContainer}>
+          <div style={{ height: 700 }}>
+            <StripedDataGrid
+              rows={rows}
+              columns={columns}
+              pageSize={9}
+              rowsPerPageOptions={[5]}
+              disableSelectionOnClick
+              getRowClassName={(params) => {
+                console.log(params)
+                return params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+              }
+              }
+            />
+          </div>
         </Box>
       </Box>
+
     </>
   );
 };
