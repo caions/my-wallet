@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns/esm";
 import * as yup from "yup";
 import { ValidateOptions } from "yup/lib/types";
+import MainLayout from "../../layouts/MainLayout";
 
 const columns: GridColDef[] = [
   {
@@ -274,7 +275,7 @@ const Expenses: React.FC = () => {
   }, [])
 
   return (
-    <>
+    <MainLayout>
       <Box sx={container}>
         <Title />
         <Box sx={formContainer}>
@@ -383,8 +384,7 @@ const Expenses: React.FC = () => {
           </div>
         </Box>
       </Box>
-
-    </>
+    </MainLayout>
   );
 };
 
