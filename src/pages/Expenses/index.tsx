@@ -4,7 +4,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { DataGrid, gridClasses, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridCellParams, gridClasses, GridColDef } from '@mui/x-data-grid';
 import React, { useEffect, useState } from "react";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import Button from "../../components/Button";
@@ -85,7 +85,7 @@ const rows2 = [
   { id: 3, descricao: 'produto 3', preco: '22.50', quantidade: '45', date: new Date(), acao: "Editar Excluir" },
   { id: 4, descricao: 'produto 4 ', preco: '22.50', quantidade: '16', date: new Date(), acao: "Editar Excluir" },
   { id: 5, descricao: 'produto 5', preco: '22.50', quantidade: '15', date: new Date(), acao: "Editar Excluir" },
-  { id: 6, descricao: 'produto 6', preco: '50.50', quantidade: '150', date: new Date() },
+  { id: 6, descricao: 'produto 6', preco: '50.50', quantidade: '150', date: new Date(), acao: "Editar Excluir" },
   { id: 7, descricao: 'produto 7', preco: '22.50', quantidade: '44', date: new Date(), acao: "Editar Excluir" },
   { id: 8, descricao: 'produto 8', preco: '22.50', quantidade: '36', date: new Date(), acao: "Editar Excluir" },
   { id: 9, descricao: 'produto 9', preco: '22.50', quantidade: '65', date: new Date(), acao: "Editar Excluir" },
@@ -195,6 +195,7 @@ const Expenses: React.FC = () => {
   const [rows, setRows] = useState<IRows[]>([]);
   const [errors, setErrors] = useState<IErrors>({});
   const [validate, setValidate] = useState<boolean>(false);
+
   const navigate = useNavigate();
 
   yup.setLocale({
@@ -264,11 +265,17 @@ const Expenses: React.FC = () => {
     }
   };
 
-  const deleteRow = (key: number) => {
-    if (confirm('Deseja realmente excluir esse item?')) {
-      setRows(rows.filter((r) => r.id !== key))
+  const deleteRow = ({ id, field }: GridCellParams) => {
+
+    if (field === 'acao') {
+      if (confirm('Deseja realmente excluir esse item?')) {
+        setRows(rows.filter((r) => r.id !== id))
+      }
     }
+
+
   }
+
 
   useEffect(() => {
     setRows(rows2)
@@ -370,13 +377,13 @@ const Expenses: React.FC = () => {
         <Box sx={tableContainer}>
           <div style={{ height: 700 }}>
             <StripedDataGrid
+              onCellClick={(params) => deleteRow(params)}
               rows={rows}
               columns={columns}
               pageSize={9}
               rowsPerPageOptions={[5]}
               disableSelectionOnClick
               getRowClassName={(params) => {
-                console.log(params)
                 return params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
               }
               }
