@@ -80,18 +80,19 @@ const columns: GridColDef[] = [
 ];
 
 const rows2 = [
-  { id: 1, descricao: 'produto 1', preco: '22.50', quantidade: '35', date: new Date(), acao: "Editar Excluir" },
-  { id: 2, descricao: 'produto 2', preco: '22.50', quantidade: '42', date: new Date(), acao: "Editar Excluir" },
-  { id: 3, descricao: 'produto 3', preco: '22.50', quantidade: '45', date: new Date(), acao: "Editar Excluir" },
-  { id: 4, descricao: 'produto 4 ', preco: '22.50', quantidade: '16', date: new Date(), acao: "Editar Excluir" },
-  { id: 5, descricao: 'produto 5', preco: '22.50', quantidade: '15', date: new Date(), acao: "Editar Excluir" },
-  { id: 6, descricao: 'produto 6', preco: '50.50', quantidade: '150', date: new Date(), acao: "Editar Excluir" },
-  { id: 7, descricao: 'produto 7', preco: '22.50', quantidade: '44', date: new Date(), acao: "Editar Excluir" },
-  { id: 8, descricao: 'produto 8', preco: '22.50', quantidade: '36', date: new Date(), acao: "Editar Excluir" },
-  { id: 9, descricao: 'produto 9', preco: '22.50', quantidade: '65', date: new Date(), acao: "Editar Excluir" },
+  { id: 1, descricao: 'produto 1', preco: '22.50', quantidade: '35', date: new Date(), acao: "Excluir" },
+  { id: 2, descricao: 'produto 2', preco: '22.50', quantidade: '42', date: new Date(), acao: "Excluir" },
+  { id: 3, descricao: 'produto 3', preco: '22.50', quantidade: '45', date: new Date(), acao: "Excluir" },
+  { id: 4, descricao: 'produto 4 ', preco: '22.50', quantidade: '16', date: new Date(), acao: "Excluir" },
+  { id: 5, descricao: 'produto 5', preco: '22.50', quantidade: '15', date: new Date(), acao: "Excluir" },
+  { id: 6, descricao: 'produto 6', preco: '50.50', quantidade: '150', date: new Date(), acao: "Excluir" },
+  { id: 7, descricao: 'produto 7', preco: '22.50', quantidade: '44', date: new Date(), acao: "Excluir" },
+  { id: 8, descricao: 'produto 8', preco: '22.50', quantidade: '36', date: new Date(), acao: "Excluir" },
+  { id: 9, descricao: 'produto 9', preco: '22.50', quantidade: '65', date: new Date(), acao: "Excluir" },
 ];
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+  maxHeight: '635px',
   [`& .${gridClasses.row}.even`]: {
     backgroundColor: theme.palette.grey[200],
     '&:hover, &.Mui-hovered': {
@@ -195,6 +196,7 @@ const Expenses: React.FC = () => {
   const [rows, setRows] = useState<IRows[]>([]);
   const [errors, setErrors] = useState<IErrors>({});
   const [validate, setValidate] = useState<boolean>(false);
+  const [editable, setEditable] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -256,7 +258,7 @@ const Expenses: React.FC = () => {
           preco: "R$ " + preco,
           quantidade,
           date: format(new Date(date ?? ""), "dd/MM/yyyy"),
-          acao: "Editar Excluir",
+          acao: "Excluir",
         },
       ]);
       setDescricao("");
@@ -265,17 +267,22 @@ const Expenses: React.FC = () => {
     }
   };
 
-  const deleteRow = ({ id, field }: GridCellParams) => {
-
+  const handleCellClick = ({ id, field }: GridCellParams) => {
+    setEditable(false)
     if (field === 'acao') {
       if (confirm('Deseja realmente excluir esse item?')) {
+        // delete row
         setRows(rows.filter((r) => r.id !== id))
       }
     }
 
+    if (field !== 'acao') {
+      if (confirm('Deseja realmente editar esse item?')) {
+        setEditable(true)
+      }
+    }
 
   }
-
 
   useEffect(() => {
     setRows(rows2)
@@ -377,10 +384,11 @@ const Expenses: React.FC = () => {
         <Box sx={tableContainer}>
           <div style={{ height: 700 }}>
             <StripedDataGrid
-              onCellClick={(params) => deleteRow(params)}
+              onCellClick={(params) => handleCellClick(params)}
+              isCellEditable={() => editable}
               rows={rows}
               columns={columns}
-              pageSize={9}
+              pageSize={10}
               rowsPerPageOptions={[5]}
               disableSelectionOnClick
               getRowClassName={(params) => {
