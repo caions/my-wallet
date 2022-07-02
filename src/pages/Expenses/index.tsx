@@ -17,6 +17,7 @@ import { format } from "date-fns/esm";
 import * as yup from "yup";
 import { ValidateOptions } from "yup/lib/types";
 import MainLayout from "../../layouts/MainLayout";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const columns: GridColDef[] = [
   {
@@ -75,21 +76,13 @@ const columns: GridColDef[] = [
     headerAlign: 'center',
     align: 'center',
     hideSortIcons: true,
-    disableColumnMenu: true
+    disableColumnMenu: true,
+    renderCell: () => {
+      return <DeleteIcon color="error" sx={{ cursor: 'pointer' }} />
+    },
   }
 ];
 
-const rows2 = [
-  { id: 1, descricao: 'produto 1', preco: '22.50', quantidade: '35', date: new Date(), acao: "Excluir" },
-  { id: 2, descricao: 'produto 2', preco: '22.50', quantidade: '42', date: new Date(), acao: "Excluir" },
-  { id: 3, descricao: 'produto 3', preco: '22.50', quantidade: '45', date: new Date(), acao: "Excluir" },
-  { id: 4, descricao: 'produto 4 ', preco: '22.50', quantidade: '16', date: new Date(), acao: "Excluir" },
-  { id: 5, descricao: 'produto 5', preco: '22.50', quantidade: '15', date: new Date(), acao: "Excluir" },
-  { id: 6, descricao: 'produto 6', preco: '50.50', quantidade: '150', date: new Date(), acao: "Excluir" },
-  { id: 7, descricao: 'produto 7', preco: '22.50', quantidade: '44', date: new Date(), acao: "Excluir" },
-  { id: 8, descricao: 'produto 8', preco: '22.50', quantidade: '36', date: new Date(), acao: "Excluir" },
-  { id: 9, descricao: 'produto 9', preco: '22.50', quantidade: '65', date: new Date(), acao: "Excluir" },
-];
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   maxHeight: '635px',
@@ -147,31 +140,6 @@ const Expenses: React.FC = () => {
     display: "flex",
     justifyContent: "space-between",
     margin: "20px 0",
-  };
-
-  const tableStyle = {
-    minWidth: 650,
-    ".MuiTableRow-head": {
-      height: "50px",
-      backgroundColor: "primary.main",
-      ".MuiTableCell-root": {
-        color: "white",
-        fontWeight: 700,
-      },
-    },
-    ".MuiTableRow-root": {
-      height: "50px",
-    },
-    ".MuiTableRow-root:last-child": {},
-    ".MuiTableRow-root:nth-of-type(even)": {
-      backgroundColor: "common.white",
-    },
-    ".MuiTableCell-head": {
-      fontSize: "17px",
-    },
-    ".MuiTableCell-body": {
-      fontSize: "17px",
-    },
   };
 
   interface IRows {
@@ -285,7 +253,7 @@ const Expenses: React.FC = () => {
   }
 
   useEffect(() => {
-    setRows(rows2)
+    setRows(rows)
   }, [])
 
   return (
