@@ -4,7 +4,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { DataGrid, GridCellParams, gridClasses, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridCellParams, gridClasses, GridColDef, GridFooter } from '@mui/x-data-grid';
 import React, { useEffect, useState } from "react";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import Button from "../../components/Button";
@@ -161,10 +161,12 @@ const Expenses: React.FC = () => {
   const [preco, setPreco] = useState("");
   const [quantidade, setQuantidade] = useState("");
   const [date, setDate] = useState<Date | null>(new Date());
-  const [rows, setRows] = useState<IRows[]>([]);
+  const [rows, setRows] = useState<IRows[]>(JSON.parse(localStorage.getItem("rows") || "[]"));
   const [errors, setErrors] = useState<IErrors>({});
   const [validate, setValidate] = useState<boolean>(false);
   const [editable, setEditable] = useState<boolean>(false);
+  const [total, setTotal] = useState<number>(0)
+  const [saldo, setSaldo] = useState<number | null>(Number(localStorage.getItem('wallet')))
 
   const navigate = useNavigate();
 
@@ -210,7 +212,6 @@ const Expenses: React.FC = () => {
       });
   }
 
-
   const handleSubmit = () => {
 
     validateFields()
@@ -221,9 +222,9 @@ const Expenses: React.FC = () => {
       setRows([
         ...rows,
         {
-          id: rows.length + 1,
+          id: rows.length === 0 ? 1 : rows[rows.length - 1].id + 1,
           descricao,
-          preco: "R$ " + preco,
+          preco: "R$ " + Number(preco) * Number(quantidade),
           quantidade,
           date: format(new Date(date ?? ""), "dd/MM/yyyy"),
           acao: "Excluir",
@@ -244,7 +245,7 @@ const Expenses: React.FC = () => {
       }
     }
 
-    if (field !== 'acao') {
+    if (field !== 'acao' && field !== 'id') {
       if (confirm('Deseja realmente editar esse item?')) {
         setEditable(true)
       }
@@ -256,6 +257,38 @@ const Expenses: React.FC = () => {
     setRows(rows)
   }, [])
 
+  useEffect(() => {
+    const precos = []
+    let resultadoSoma = 0
+
+    for (const i of rows) {
+      const preco = i.preco?.split(" ")[1]
+      precos.push(Number(preco))
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sumPrecos = (acc: any, cur: any) => { return acc + cur };
+
+      resultadoSoma = precos.reduce(sumPrecos)
+    }
+
+    setTotal(resultadoSoma)
+
+    setSaldo(Number(localStorage.getItem("wallet")) - resultadoSoma)
+    localStorage.setItem("rows", JSON.stringify(rows));
+
+  }, [rows])
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const CustomFooterComponent = () => {
+
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '30px' }}>
+        Custo Total: {total}
+        <GridFooter />
+      </Box>
+    )
+  }
+
   return (
     <MainLayout>
       <Box sx={container}>
@@ -265,7 +298,9 @@ const Expenses: React.FC = () => {
             <Button color='warning' onClick={() => navigate("/")}>
               Voltar
             </Button>
-            <InputText innerStartAdornment='R$' disabled />
+            <InputText
+              topLabel='Wallet'
+              innerStartAdornment='R$' value={saldo} disabled />
           </Box>
           <form method='post' onSubmit={e => e.preventDefault()}>
             <InputText
@@ -277,7 +312,6 @@ const Expenses: React.FC = () => {
               onChange={e => setDescricao(e.target.value)}
               helperText={errors.descricao}
             />
-            {/*  <span>{errors[0]}</span> */}
             <Box sx={sectionInputsRow}>
               <InputText
                 error={!!errors.preco}
@@ -363,6 +397,7 @@ const Expenses: React.FC = () => {
                 return params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
               }
               }
+              components={{ Footer: CustomFooterComponent }}
             />
           </div>
         </Box>

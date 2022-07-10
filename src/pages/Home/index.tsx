@@ -1,5 +1,5 @@
+import React, { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import { InputText } from "../../components/InputText";
@@ -23,6 +23,11 @@ const boxStyle = {
 };
 
 export const Home: React.FC = () => {
+
+  const [salary, setSalary] = useState<string | null>(localStorage.getItem("wallet"))
+
+  localStorage.setItem("wallet", String(salary))
+
   const navigate = useNavigate();
 
   return (
@@ -30,7 +35,7 @@ export const Home: React.FC = () => {
       <Title />
       <Typography variant='h3'>Bem vindo!</Typography>
       <Typography variant='h6'>Adicione o saldo da carteira</Typography>
-      <InputText innerStartAdornment='R$' type='number' />
+      <InputText innerStartAdornment='R$' type='text' onChange={(e) => setSalary(e.target.value)} value={salary} />
       <Button onClick={() => navigate("/expenses")}>Entrar</Button>
     </Box>
   );
